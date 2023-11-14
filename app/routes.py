@@ -5,8 +5,10 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from .forms import RegistrationForm, LoginForm, PostForm
 from .models import User, db, Post
 from datetime import datetime
+from .utils import search_location, show_images, location_description
 
-# IF SOME OF THESE DONT REDIRECT, TRY REMOVING APP. IN FRONT OF THE URL DESTINATION
+
+# IF SOME OF THESE DONT REDIRECT, TRY REMOVING  IN FRONT OF THE URL DESTINATION
 
 
 @app.route('/')
@@ -66,31 +68,34 @@ def feed():
     posts = Post.query.order_by(Post.date_created.desc()).all()
     return render_template('feed.html', posts=posts)
 
-# Route for Creating a post
-@app.route('/posts/create', methods = ['GET', 'POST'])
+@app.route('/posts/create', methods=['GET', 'POST'])
 @login_required
 def create_post():
-   form = PostForm()
-   if request.method == 'POST':
-      if form.validate():
-         title = form.title.data
-         img_url = form.img_url.data
-         description = form.description.data
+    form = PostForm()
+    if form.validate_on_submit():  # This method checks if it is a POST request and if the form is valid.
+        title = form.title.data
+        img_url = form.img_url.data
+        description = form.description.data
 
-         post = Post(title, img_url, description, current_user.id)
+        # Assuming Post() takes title, img_url, description, and user_id as arguments
+        post = Post(title=title, img_url=img_url, description=description, user_id=current_user.id)
 
+        db.session.add(post)
+        db.session.commit()
+        flash('You have added a new destination!', 'success')
+        # Redirect to a function that shows the individual post, ensure that this function exists and is defined correctly
+        return redirect(url_for('individual_post_page', post_id=post.id))
+    
+    # The return statement here is for a GET request and also acts as a fallback if form validation fails.
+    return render_template('create-post.html', form=form)
 
-         db.session.add(post)
-         db.session.commit()
-         flash('You have added a new destination!', 'success')
-         return redirect(url_for('individual-post-page'))
-      return render_template('create-post.html', form = form)
    
 
 # This route shows individual posts created by users   
 @app.route('/posts/<post_id>')
 def individual_post_page(post_id):
     post = Post.query.get(post_id)
+    print(post.user.username)
     return render_template('individual-post.html', p=post)   
     
     
@@ -99,16 +104,16 @@ def individual_post_page(post_id):
 
 
 # Route for Editing a post
-@app.route('/posts/update/<post_id>', methods=["GET", "POST"])
+@app.route('/posts/update/<int:post_id>', methods=["GET", "POST"])
 @login_required
 def update_post(post_id):
     post = Post.query.get(post_id)
     if not post:
         flash('That post does not exist', 'danger')
-        return redirect(url_for('app.feed'))
+        return redirect(url_for('feed'))
     if current_user.id != post.user_id:
         flash('You cannot edit another user\'s posts', 'danger')
-        return redirect(url_for('app.individual_post_page', post_id=post_id))
+        return redirect(url_for('individual_post_page', post_id=post_id))
     form = PostForm()
     if request.method == "POST":
         if form.validate():
@@ -123,20 +128,20 @@ def update_post(post_id):
 
             db.session.commit()
             flash('Successfully updated your post.', 'success')
-            return redirect(url_for('app.individual_post_page', post_id=post_id))
+            return redirect(url_for('individual_post_page', post_id=post_id))
     return render_template('update-post.html', p=post, form = form)
 
 
 
 
-# Route for Deleting a Post
+
 @app.route('/posts/delete/<post_id>', methods=["GET"])
 @login_required
 def delete_post(post_id):
     post = Post.query.get(post_id)
     if not post:
         flash('This post does not exist', 'danger')
-        return redirect(url_for('app.feed'))
+        return redirect(url_for('feed'))
     if current_user.id != post.user_id:
         flash('You cannot delete another user\'s posts', 'danger')
         return redirect(url_for('app.individual_post_page', post_id=post_id))
@@ -144,8 +149,46 @@ def delete_post(post_id):
     db.session.delete(post)
     db.session.commit()
     flash('Successfully deleted your post', 'success')
-    return redirect(url_for('app.feed'))
+    return redirect(url_for('feed'))
 
 
 
-# Route for Reading others Posts
+@app.route('/search', methods=['GET', 'POST'])
+def search_results():
+    if request.method == 'POST':
+        location = request.form.get('location')
+        if location:
+            search_results = search_location(location)
+            if 'data' in search_results:
+                combined_results = []
+                for item in search_results['data']:
+                    location_id = item.get('location_id')
+                    images = show_images(location_id)
+                    description = location_description(location_id)
+                    # Check if 'data' key exists in images response and description is not None
+                    if 'data' in images and description:
+                        image_url = images['data'][0]['images']['large']['url'] if 'data' in images and images['data'] else None
+                        combined_data = {
+                            'name': item.get('name'),
+                            'address': item['address_obj']['address_string'],
+                            'description': description,
+                            'image_url': image_url
+                        }
+                        combined_results.append(combined_data)
+                return render_template('search_results.html', results=combined_results)
+            else:
+                flash('No results found or an error occurred.', 'danger')
+        else:
+            flash('Please enter a location to search for.', 'warning')
+        return redirect(url_for('search'))
+    return render_template('search.html')
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="destination-feed">
+  {% for destination in destinations %}
+  <div class="destination-card">
+    <h2>{{ destination.name }}</h2>
+    <p>{{ destination.description }}</p>
+    <img src="{{ destination.img_url }}" alt="destination.name">
+  </div>
+{% endfor %}
+</div>
+{% endblock %}

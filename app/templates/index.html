@@ -1,7 +1,56 @@
 {% extends 'base.html' %}
 
-{% block content  %}
+{% block content %}
+<style>
+    .search-container {
+        background-image: url('https://img.freepik.com/premium-photo/mountain-lake-with-mountain-background_931553-76866.jpg?size=626&ext=jpg&ga=GA1.1.1826414947.1699747200&semt=ais');
+        background-size: cover;
+        background-position: center;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 
-<h1>Hello World</h1>
+    .search-box {
+        background: rgba(255, 255, 255, 0.9); /* Slight white transparent background */
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
 
-{% endblock  %}
+    .search-box h2 {
+        color: #333; /* Adjust title color for better visibility on your background */
+        margin-bottom: 1rem;
+    }
+
+    .search-box .form-control {
+        border: 2px solid #ddd; /* Enhance input border */
+        border-radius: 5px; /* Rounded corners for input */
+        padding: 0.5rem 1rem;
+    }
+
+    .search-box .btn-outline-success {
+        border-color: #28a745; /* Keep consistent with success color */
+        color: #28a745;
+        margin-left: 0.5rem; /* Space between input and button */
+        padding: 0.5rem 1rem;
+        border-radius: 5px; /* Rounded corners for button */
+    }
+
+    .search-box .btn-outline-success:hover {
+        background: #28a745; /* Background color on hover */
+        color: #fff;
+    }
+</style>
+
+<div class="search-container">
+    <div class="search-box">
+        <h2 class="text-center">Discover Your Next Adventure</h2>
+        <form action="{{ url_for('search_results') }}" method="POST" class="d-flex">
+            <input type="text" class="form-control me-2" placeholder="Search destinations, hotels, restaurants..." name="location" aria-label="Search">
+            <button class="btn btn-outline-success" type="submit">Search</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

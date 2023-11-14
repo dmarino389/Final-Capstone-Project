@@ -12,7 +12,7 @@ app.config.from_object(Config)
 db.init_app(app)
 migrate = Migrate(app,db)
 login_manager = LoginManager(app)
-login_manager.loging_view = 'login'
+login_manager.login_view = 'login'
 
 
 from app.models import User, Post, Comment
@@ -24,5 +24,4 @@ def load_user(user_id):
 
 
 from app import routes
-
 
