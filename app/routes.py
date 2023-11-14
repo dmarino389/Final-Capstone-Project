@@ -99,6 +99,14 @@ def individual_post_page(post_id):
     return render_template('individual-post.html', p=post)   
     
     
+from flask_login import current_user
+
+@app.route('/my_posts')
+@login_required
+def my_posts():
+    # Retrieve all posts created by the current user
+    user_posts = Post.query.filter_by(user_id=current_user.id).order_by(Post.date_created.desc()).all()
+    return render_template('my_posts.html', posts=user_posts)
 
 
 

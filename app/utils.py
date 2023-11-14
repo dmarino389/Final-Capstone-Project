@@ -32,7 +32,7 @@ import requests
 def show_images(location_id):
     url = f"https://api.content.tripadvisor.com/api/v1/location/{location_id}/photos"
     headers = {'accept': 'application/json'}
-    params = {'key': 'YOUR_API_KEY'}  # Replace 'YOUR_API_KEY' with your actual API key
+    params = {'key': '6A2A0969ED22430DB68AB70E1E89FE91'}  # Replace 'YOUR_API_KEY' with your actual API key
     
     try:
         response = requests.get(url, headers=headers, params=params)
@@ -53,7 +53,7 @@ def show_images(location_id):
 def location_description(location_id):
     url = f"https://api.content.tripadvisor.com/api/v1/location/{location_id}/details"
     headers = {'accept': 'application/json'}
-    params = {'key': 'YOUR_API_KEY'}
+    params = {'key': '6A2A0969ED22430DB68AB70E1E89FE91'}
     try:
         response = requests.get(url, headers=headers, params=params)
         if response.status_code == 200:
@@ -65,16 +65,6 @@ def location_description(location_id):
     except requests.RequestException as e:
         # Handle any exceptions that occur during the HTTP request
         return {'error': str(e)}
-
-
-
-
-# print(search_location('Omaha'))
-
-# # show_images('91516')
-
-# # location_description(91516)
-
 
 
 
