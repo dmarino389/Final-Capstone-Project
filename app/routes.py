@@ -173,14 +173,17 @@ def search_results():
                     location_id = item.get('location_id')
                     images = show_images(location_id)
                     description = location_description(location_id)
+                    # for k,v in description.items():
+                    #     print(k,v)
+                    print(description.get('description'))
                     # Check if 'data' key exists in images response and description is not None
                     if 'data' in images and description:
                         image_url = images['data'][0]['images']['large']['url'] if 'data' in images and images['data'] else None
                         combined_data = {
                             'name': item.get('name'),
                             'address': item['address_obj']['address_string'],
-                            'description': description,
-                            'image_url': image_url
+                            'description': description.get('description', '')[:100] + '...',
+                            'image_url': image_url if image_url else 'https://picsum.photos/300/200'
                         }
                         combined_results.append(combined_data)
                 return render_template('search_results.html', results=combined_results)
